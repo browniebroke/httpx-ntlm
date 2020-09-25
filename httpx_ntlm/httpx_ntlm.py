@@ -151,7 +151,11 @@ class HttpNtlmAuth(Auth):
         not an HTTPS endpoint
         """
         if self.send_cbt and response.url.is_ssl:
-            cert = get_server_certificate((response.url.host, response.url.port))
+            if response.url.port is None:
+                port = {"https":"443", "http": "80"}.get(response.url.scheme, "")
+            else:
+                port = response.url.port
+            cert = get_server_certificate((response.url.host, port))
             der_cert = PEM_cert_to_DER_cert(cert)
             certificate_hash = _get_certificate_hash(der_cert)
             return certificate_hash
