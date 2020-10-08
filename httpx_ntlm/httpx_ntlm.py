@@ -150,9 +150,9 @@ class HttpNtlmAuth(Auth):
         :return: The hash of the DER encoded certificate at the request_url or None if
         not an HTTPS endpoint
         """
-        if self.send_cbt and response.url.is_ssl:
+        if self.send_cbt and response.url.scheme == "https":
             if response.url.port is None:
-                port = {"https":"443", "http": "80"}.get(response.url.scheme, "")
+                port = "443"
             else:
                 port = response.url.port
             cert = get_server_certificate((response.url.host, port))
