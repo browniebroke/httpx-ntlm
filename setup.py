@@ -5,9 +5,9 @@ from setuptools import setup
 
 setup(
     name="httpx_ntlm",
-    version="0.0.8",
+    version="0.0.9",
     packages=["httpx_ntlm"],
-    install_requires=["httpx==0.15.*", "ntlm-auth==1.5.*", "cryptography==3.1.*"],
+    install_requires=["httpx>=0.15.*", "ntlm-auth==1.5.*", "cryptography==3.1.*"],
     provides=["httpx_ntlm"],
     author="Ludovic VAUGEOIS",
     author_email="ulodciv@gmail.com",
