@@ -1,6 +1,6 @@
-httpx>=0.18.*
+httpx>=0.21.*
 ntlm-auth==1.5.*
-cryptography==3.4.*
+cryptography==36.0.*
 flask
 pytest
 pytest-cov
