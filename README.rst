@@ -7,7 +7,7 @@ adaptation of https://github.com/requests/requests-ntlm.
 Usage
 -----
 
-``HttpNtlmAuth`` extends HTTPX ``Auth`` base calss, so usage is simple:
+``HttpNtlmAuth`` extends HTTPX ``Auth`` base class, so usage is simple:
 
 .. code:: python
 
@@ -38,8 +38,7 @@ Requirements
 ------------
 
 - httpx_
-- ntlm-auth_
+- pyspnego_
 
 .. _httpx: https://github.com/encode/httpx
-.. _ntlm-auth: https://github.com/jborean93/ntlm-auth
-
+.. _pyspnego: https://github.com/jborean93/pyspnego

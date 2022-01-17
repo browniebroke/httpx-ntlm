@@ -1,13 +1,14 @@
+import base64
 import binascii
 import warnings
 from ssl import get_server_certificate, PEM_cert_to_DER_cert
 from typing import Generator
 
+import spnego
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.exceptions import UnsupportedAlgorithm
-from ntlm_auth import ntlm
 from httpx import Auth, Request, Response
 
 
@@ -18,24 +19,13 @@ class UnknownSignatureAlgorithmOID(Warning):
 class HttpNtlmAuth(Auth):
     """ HTTP NTLM Authentication Handler for HTTPX. """
 
-    def __init__(self, username, password, send_cbt=True, domain=None):
+    def __init__(self, username, password, send_cbt=True):
         """Create an authentication handler for NTLM over HTTP.
         :param str username: Username in 'domain\\username' format
         :param str password: Password
         :param bool send_cbt: Will send the channel bindings over a HTTPS channel (Default: True)
-        :param str domain: Domain, when no provided as prefix in username (Default: None)
         """
-        if domain:
-            self.domain = domain
-            self.username = username
-        else:
-            try:
-                self.domain, self.username = username.split("\\", 1)
-            except ValueError:
-                self.username = username
-                self.domain = ""
-        if self.domain:
-            self.domain = self.domain.upper()
+        self.username = username
         self.password = password
         self.send_cbt = send_cbt
 
@@ -45,7 +35,7 @@ class HttpNtlmAuth(Auth):
             """
             Given a WWW-Authenticate or Proxy-Authenticate header, returns the
             authentication type to use. We prefer NTLM over Negotiate if the server
-            suppports it.
+            supports it.
             """
             header = header.lower() or ""
             if "ntlm" in header:
@@ -97,10 +87,10 @@ class HttpNtlmAuth(Auth):
         # request = request.copy()
         # ntlm returns the headers as a base64 encoded bytestring. Convert to
         # a string.
-        context = ntlm.Ntlm()
-        negotiate_message = context.create_negotiate_message(self.domain).decode(
-            "ascii"
-        )
+        client = spnego.client(self.username, self.password, protocol="ntlm")
+        # Perform the first step of the NTLM authentication
+        negotiate_message = base64.b64encode(client.step()).decode("ascii")
+
         request.headers[req_header] = f"{auth_type} {negotiate_message}"
         # A streaming response breaks authentication.
         # This can be fixed by not streaming this request, which is safe
@@ -126,17 +116,11 @@ class HttpNtlmAuth(Auth):
         ).strip()
 
         # Parse the challenge in the ntlm context
-        context.parse_challenge_message(ntlm_header_value[len(auth_strip) :])
+        # Parse the challenge in the ntlm context and perform
+        # the second step of authentication
+        val = base64.b64decode(ntlm_header_value[len(auth_strip):].encode())
+        authenticate_message = base64.b64encode(client.step(val)).decode("ascii")
 
-        # build response
-        # Get the response based on the challenge message
-        authenticate_message = context.create_authenticate_message(
-            self.username,
-            self.password,
-            self.domain,
-            server_certificate_hash=server_certificate_hash,
-        )
-        authenticate_message = authenticate_message.decode("ascii")
         auth = f"{auth_type} {authenticate_message}"
         request.headers[req_header] = auth
         yield request

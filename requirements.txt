@@ -1,5 +1,5 @@
 httpx>=0.21.*
-ntlm-auth==1.5.*
+pyspnego==0.3.*
 cryptography==36.0.*
 flask
 pytest

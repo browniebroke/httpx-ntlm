@@ -5,11 +5,11 @@ from setuptools import setup
 
 setup(
     name="httpx_ntlm",
-    version="0.0.11",
+    version="1.0.0",
     packages=["httpx_ntlm"],
     install_requires=[
         "httpx>=0.21.*",
-        "ntlm-auth==1.5.*",
+        "pyspnego==0.3.*",
         "cryptography==36.0.*",
     ],
     provides=["httpx_ntlm"],
