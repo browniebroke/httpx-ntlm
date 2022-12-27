@@ -1,14 +1,8 @@
 import base64
-import binascii
 import warnings
-from ssl import get_server_certificate, PEM_cert_to_DER_cert
 from typing import Generator
 
 import spnego
-from cryptography import x509
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.exceptions import UnsupportedAlgorithm
 from httpx import Auth, Request, Response
 
 
