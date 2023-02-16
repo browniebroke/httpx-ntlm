@@ -1,5 +1,4 @@
 import base64
-import warnings
 from typing import Generator
 
 import spnego
@@ -67,6 +66,7 @@ class HttpNtlmAuth(Auth):
         auth_type = auth_from_header(response.headers.get(resp_header))
         if not auth_type:
             return
+            
         """Attempt to authenticate using HTTP NTLM challenge/response."""
         if req_header in request.headers:
             return
@@ -116,4 +116,3 @@ class HttpNtlmAuth(Auth):
         auth = f"{auth_type} {authenticate_message}"
         request.headers[req_header] = auth
         yield request
-
