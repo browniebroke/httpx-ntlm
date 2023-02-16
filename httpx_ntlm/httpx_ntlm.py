@@ -1,14 +1,7 @@
 import base64
-import binascii
-import warnings
-from ssl import get_server_certificate, PEM_cert_to_DER_cert
 from typing import Generator
 
 import spnego
-from cryptography import x509
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.exceptions import UnsupportedAlgorithm
 from httpx import Auth, Request, Response
 
 
@@ -73,8 +66,7 @@ class HttpNtlmAuth(Auth):
         auth_type = auth_from_header(response.headers.get(resp_header))
         if not auth_type:
             return
-        # Get the certificate of the server if using HTTPS for CBT
-        server_certificate_hash = self._get_server_cert(response)
+
         """Attempt to authenticate using HTTP NTLM challenge/response."""
         if req_header in request.headers:
             return
@@ -124,52 +116,3 @@ class HttpNtlmAuth(Auth):
         auth = f"{auth_type} {authenticate_message}"
         request.headers[req_header] = auth
         yield request
-
-    def _get_server_cert(self, response: Response):
-        """
-        Get the certificate at the request_url and return it as a hash. The
-        certificate hash is then used with NTLMv2 authentication for Channel Binding
-        Tokens support.
-        :param response: The original 401 response from the server
-        :return: The hash of the DER encoded certificate at the request_url or None if
-        not an HTTPS endpoint
-        """
-        if self.send_cbt and response.url.scheme == "https":
-            if response.url.port is None:
-                port = "443"
-            else:
-                port = response.url.port
-            cert = get_server_certificate((response.url.host, port))
-            der_cert = PEM_cert_to_DER_cert(cert)
-            certificate_hash = _get_certificate_hash(der_cert)
-            return certificate_hash
-        else:
-            return None
-
-
-def _get_certificate_hash(certificate_der):
-    # https://tools.ietf.org/html/rfc5929#section-4.1
-    cert = x509.load_der_x509_certificate(certificate_der, default_backend())
-
-    try:
-        hash_algorithm = cert.signature_hash_algorithm
-    except UnsupportedAlgorithm as ex:
-        warnings.warn(
-            "Failed to get signature algorithm from certificate, "
-            "unable to pass channel bindings: %s" % str(ex),
-            UnknownSignatureAlgorithmOID,
-        )
-        return None
-
-    # if the cert signature algorithm is either md5 or sha1 then use sha256
-    # otherwise use the signature algorithm
-    if hash_algorithm.name in ["md5", "sha1"]:
-        digest = hashes.Hash(hashes.SHA256(), default_backend())
-    else:
-        digest = hashes.Hash(hash_algorithm, default_backend())
-
-    digest.update(certificate_der)
-    certificate_hash_bytes = digest.finalize()
-    certificate_hash = binascii.hexlify(certificate_hash_bytes).decode().upper()
-
-    return certificate_hash
