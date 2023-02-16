@@ -66,7 +66,7 @@ class HttpNtlmAuth(Auth):
         auth_type = auth_from_header(response.headers.get(resp_header))
         if not auth_type:
             return
-
+            
         """Attempt to authenticate using HTTP NTLM challenge/response."""
         if req_header in request.headers:
             return
