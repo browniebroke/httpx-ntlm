@@ -16,6 +16,8 @@ setup(
     author_email="ulodciv@gmail.com",
     url="https://github.com/ulodciv/httpx-ntlm",
     description="This package allows for HTTP NTLM authentication using the HTTPX library.",
+    long_description=open('README.rst').read(),
+    long_description_content_type='text/x-rst',
     license="ISC",
     classifiers=[
         "Development Status :: 4 - Beta",
