@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name="httpx_ntlm",
-    version="1.1.0",
+    version="1.2.0",
     packages=["httpx_ntlm"],
     install_requires=[
         "httpx>=0.21",
@@ -24,6 +24,10 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "License :: OSI Approved :: ISC License (ISCL)",
     ],
 )
