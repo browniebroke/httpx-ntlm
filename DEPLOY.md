@@ -1,3 +1,4 @@
+```
 rm -rf venv
 python3.8 -m venv venv
 source venv/bin/activate
@@ -6,3 +7,4 @@ rm -rf dist/
 python setup.py sdist bdist_wheel
 twine check dist/*
 twine upload dist/*
+```
