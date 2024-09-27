@@ -1,10 +1,9 @@
-import hashlib
 import unittest
 
 import httpx
 
 import httpx_ntlm
-from tests.test_utils import domain, username, password
+from tests.test_utils import domain, username, password, password_md4
 
 
 class TestHttpxNtlm(unittest.TestCase):
@@ -13,7 +12,6 @@ class TestHttpxNtlm(unittest.TestCase):
         self.test_server_username = "%s\\%s" % (domain, username)
         self.test_server_password = password
         self.auth_types = ["ntlm", "negotiate", "both"]
-        self.hash = hashlib.new('md4', password.encode('utf-16le')).hexdigest()
 
     def test_httpx_ntlm(self):
         for auth_type in self.auth_types:
@@ -33,7 +31,7 @@ class TestHttpxNtlm(unittest.TestCase):
                 url=self.test_server_url + auth_type,
                 auth=httpx_ntlm.HttpNtlmAuth(
                     self.test_server_username,
-                    "0" * 32 + ":" + self.hash
+                    "0" * 32 + ":" + password_md4
                 )
             )
 
